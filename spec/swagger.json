@@ -1,0 +1,239 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "REST endpoint documentation of Job service APIs",
+        "version": "1.0.0",
+        "title": "Job Service API",
+        "contact": {
+            "email": "tony.dev@changeartwork.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization"
+        }
+    },
+    "schemes": [
+        "http"
+    ],
+    "host": "dev.changeartwork.com",
+    "basePath": "/v1/api/job",
+    "paths": {
+        "/list": {
+            "get": {
+                "summary": "Get all the job details",
+                "description": "Get all the job details",
+                "JWT":[],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {  
+                        "name":"id",
+                        "in":"query",
+                        "description":"Filter the job based on unique identifier.",
+                        "required":false,
+                        "type":"string"
+                     }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully returns list of jobs",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/getJobsResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "example":"S3 bucket is down"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Error while getting job."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/create": {
+            "post": {
+                "summary": "Create new job",
+                "description": "Create new job with file uploads (Use postman for multiple file uploads)",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "files",
+                        "description": "Source files to estimate the job.",
+                        "type": "file",
+                        "required": false
+                    },
+                    {
+                        "in": "formData",
+                        "name": "name",
+                        "description": "Name of the client creating job.",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "in": "formData",
+                        "name": "mail",
+                        "description": "Mail address of the client creating job.",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "in": "formData",
+                        "name": "contact",
+                        "description": "Contact number of the client creating job.",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "in": "formData",
+                        "name": "service_type",
+                        "description": "Service type of the client creating job.",
+                        "type": "string",
+                        "enum": [
+                            "VECTOR_ART_WORK",
+                            "DIGITIZING"
+                        ],
+                        "required": true
+                    }
+
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Job placed successfully.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Job placed successfully"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unable place the job"
+                                },
+                                "error":{
+                                    "type": "string",
+                                    "example": "Job validation failed: service_type: `ART_WORK` is not a valid enum value for path `service_type"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Something went wrong"
+                                },
+                                "error":{
+                                    "type": "string",
+                                    "example": "Server timeout issue"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "getJobsResponse": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "example": "63a216e83239d26870c884c0"
+                },
+                "status":{
+                    "type": "string",
+                    "example": "NEW"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Tony Dev"
+                },
+                "service_type": {
+                    "type": "string",
+                    "example": "VECTOR_ART_WORK"
+                },
+                "contact":{
+                    "type": "string",
+                    "example": "9876543212"
+                },
+                "memo": {
+                    "type": "string",
+                    "example": "How about the estimation for this logo designing with multiple color code and output formats"
+                },
+                "createdAt":{
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updatedAt":{
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/fileResponse"
+                    }
+
+                }
+
+            }
+        },
+        "fileResponse": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "example": "63a216ea3239d26870c884c1"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://changeartwork-files.s3.us-west-2.amazonaws.com/job-source-files/1671567080531_1_lJ32Bl-lHWmNMUSiSq17gQ.png"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "job-source-files/1671567080531_1_lJ32Bl-lHWmNMUSiSq17gQ.png"
+                }
+            }
+        }
+    }
+}
