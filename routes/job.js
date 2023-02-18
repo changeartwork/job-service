@@ -5,6 +5,7 @@ const Job = require('../model/job');
 const auth = require("../middleware/auth");
 const {s3upload, s3download} = require("../service/s3service");
 const Router = express.Router();
+const getJob = require('../middleware/getJob');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -30,13 +31,15 @@ Router.post(
   upload.array('files'),
   async (req, res) => {
     try {
-      const { name, mail, contact, memo, service_type } = req.body;
+      const { name, mail, contact, memo, service_type, business_name, additional_details } = req.body;
       const job = new Job({
         name,
         mail,
         contact,
         memo,
-        service_type
+        service_type,
+        business_name,
+        additional_details : additional_details ? JSON.parse(additional_details) : {}
       });
       await job.save();
       const s3response = await s3upload(req.files);
@@ -75,5 +78,94 @@ Router.get('/list', auth, async (req, res) => {
   }
 });
 
+Router.post(
+  '/upload/:id',
+  auth,
+  getJob,
+  upload.array('files'),
+  async (req, res) => {
+    try {
+      const s3response = await s3upload(req.files);
+      s3response.map(async (data) => {
+        var s3details = { url: data.Location, name: data.key };
+        res.job.final_files.push(s3details);
+      })
+      await res.job.save();
+      res.status(200).json({ message: "Job final file(s) uploaded successfully" });
+    } catch (error) {
+      res.status(400).send({ message: "Unable to upload the job's final file(s)", error: error.message });
+    }
+  },
+  (error, req, res, next) => {
+    if (error) {
+      res.status(500).send({ message: "Something went wrong", error: error.message });
+    }
+  }
+);
+
+Router.post(
+  '/download',
+  auth,
+  async (req, res) => {
+    try {
+      s3download(req.body.name)
+        .then((url) => {
+          res.status(200).send({url : url})
+        })
+    } catch (error) {
+      res.status(400).send({ message: "Unable to get the file", error: error.message });
+    }
+  },
+  (error, req, res, next) => {
+    if (error) {
+      res.status(500).send({ message: "Something went wrong", error: error.message });
+    }
+  }
+);
+
+Router.post(
+  '/comment/:id',
+  auth,
+  getJob,
+  async(req,res)=>{
+    try{
+        const comments = { name: req.body.comments.name, comment: req.body.comments.comment };
+        res.job.comments.push(comments);
+        await res.job.save();
+        res.status(200).json({ message: "Comment added successfully to the Job" });
+    }
+    catch(error){
+      res.status(400).send({ message: "Unable to add the comments to job", error: error.message });
+    }
+  },
+  (error, req, res, next) => {
+    if (error) {
+      res.status(500).send({ message: "Something went wrong", error: error.message });
+    }
+  }
+)
+
+Router.put(
+  '/update/:id',
+  auth,
+  async(req,res)=> {
+    try{
+      await Job.updateOne(
+        { _id: req.params.id },
+        { status: req.body.status },
+        { runValidators: true }
+      );
+      res.status(200).json({ message: "Job status updated successfully" });
+    }
+    catch(error){
+      res.status(400).send({ message: "Unable to update the job status", error: error.message });
+    }
+  },
+  (error, req, res, next) => {
+    if (error) {
+      res.status(500).send({ message: "Something went wrong", error: error.message });
+    }
+  }
+)
 
 module.exports = Router;

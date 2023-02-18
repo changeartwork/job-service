@@ -170,6 +170,296 @@
                     }
                 }
             }
+        },
+        "/upload/:id": {
+            "post": {
+                "summary": "Upload the job",
+                "description": "Upload the job file to the mentioned job id (Use postman for multiple file uploads)",
+                "JWT": [],
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Job referrence ID.",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "in": "formData",
+                        "name": "files",
+                        "description": "Final job file.",
+                        "type": "file",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job final files uploaded successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Job final files uploaded successfully"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unable to upload the job final files"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Something went wrong"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Server timeout issue"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/download": {
+            "post": {
+                "summary": "Download the source files",
+                "description": "API to download the job source files from AWS S3 bucket.",
+                "JWT": [],
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "name",
+                        "description": "Name of the job source file to download.",
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Temporary URL link to download the S3 bucket file will be generated and will expire within 5 minuits.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "example": "https://changeartwork-files.s3.us-west-2.amazonaws.com/job-source-files/1675218337128_rhino-e-sports-team-logo-template_267565-12.jpg?AWSAccessKeyId=AKIAYWSYPY54OWKVVMFB&Expires=1676379178&Signature=IUs0%2BsWkbmv%2FG50NmJC6uwB920U%3D"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unable to get the file"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Error details from S3 bucket"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Something went wrong"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Server timeout issue"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/comment/:id": {
+            "post": {
+                "summary": "Add comments to the job for ease of communication and to maintain the conversation history.",
+                "description": "API to add comments to the given job id ",
+                "JWT": [],
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Job referrence ID.",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "in": "body",
+                        "name": "comments",
+                        "description": "Comments object containing the name of the user, date time and comment.",
+                        "type": "object",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment added to the job successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Comment added successfully to the job"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unable to add the comments to job"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Error while adding the comments"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Something went wrong"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Server timeout issue"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/update/:id": {
+            "put": {
+                "summary": "Update the job details (currently supporting status update)",
+                "description": "API to update the status of job",
+                "JWT": [],
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "Job referrence ID.",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "in": "body",
+                        "name": "status",
+                        "description": "Update the quote status with supported enums",
+                        "enum": ["NEW","INPROGRESS","ONHOLD","COMPLETED","DROPPED"],
+                        "type": "string",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job status updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Job status updated successfully"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unable to update the job status"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Error while updating the status"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Something went wrong"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "example": "Server timeout issue"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
